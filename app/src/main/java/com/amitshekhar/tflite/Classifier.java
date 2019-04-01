@@ -11,68 +11,31 @@ import java.util.List;
 public interface Classifier {
 
     class Recognition {
-        /**
-         * A unique identifier for what has been recognized. Specific to the class, not the instance of
-         * the object.
-         */
-        private final String id;
+        private byte data[][];
 
-        /**
-         * Display name for the recognition.
-         */
-        private final String title;
-
-        /**
-         * Whether or not the model features quantized or float weights.
-         */
-        private final boolean quant;
-
-        /**
-         * A sortable score for how good the recognition is relative to others. Higher should be better.
-         */
-        private final Float confidence;
-
-        public Recognition(
-                final String id, final String title, final Float confidence, final boolean quant) {
-            this.id = id;
-            this.title = title;
-            this.confidence = confidence;
-            this.quant = quant;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public Float getConfidence() {
-            return confidence;
+        public Recognition(final byte data[][]) {
+            this.data = data;
         }
 
         @Override
         public String toString() {
-            String resultString = "";
-            if (id != null) {
-                resultString += "[" + id + "] ";
+            StringBuilder sb = new StringBuilder();
+
+            try {
+                for (int i = 0; i < this.data[0].length; i++) {
+                    sb.append(this.data[0][i]);
+                }
+
+            } catch (Exception e) {
+                sb.append(e.toString());
             }
 
-            if (title != null) {
-                resultString += title + " ";
-            }
-
-            if (confidence != null) {
-                resultString += String.format("(%.1f%%) ", confidence * 100.0f);
-            }
-
-            return resultString.trim();
+            return sb.toString();
         }
     }
 
 
-    List<Recognition> recognizeImage(Bitmap bitmap);
+    Classifier.Recognition recognizeImage(Bitmap bitmap);
 
     void close();
 }

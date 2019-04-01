@@ -56,18 +56,11 @@ public class TensorFlowImageClassifier implements Classifier {
     }
 
     @Override
-    public List<Recognition> recognizeImage(Bitmap bitmap) {
+    public Classifier.Recognition recognizeImage(Bitmap bitmap) {
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
-        if(quant){
-            byte[][] result = new byte[1][128];
-            interpreter.run(byteBuffer, result);
-            return new ArrayList<>();
-        } else {
-            float [][] result = new float[1][128];
-            interpreter.run(byteBuffer, result);
-            return new ArrayList<>();
-        }
-
+        byte[][] result = new byte[1][512];
+        interpreter.run(byteBuffer, result);
+        return new Classifier.Recognition(result);
     }
 
     @Override
