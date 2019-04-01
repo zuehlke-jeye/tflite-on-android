@@ -36,7 +36,6 @@ public class TensorFlowImageClassifier implements Classifier {
 
     private Interpreter interpreter;
     private int inputSize;
-    private List<String> labelList;
     private boolean quant;
 
     private TensorFlowImageClassifier() {
@@ -45,13 +44,11 @@ public class TensorFlowImageClassifier implements Classifier {
 
     static Classifier create(AssetManager assetManager,
                              String modelPath,
-                             String labelPath,
                              int inputSize,
                              boolean quant) throws IOException {
 
         TensorFlowImageClassifier classifier = new TensorFlowImageClassifier();
         classifier.interpreter = new Interpreter(classifier.loadModelFile(assetManager, modelPath), new Interpreter.Options());
-        classifier.labelList = classifier.loadLabelList(assetManager, labelPath);
         classifier.inputSize = inputSize;
         classifier.quant = quant;
 
@@ -62,13 +59,13 @@ public class TensorFlowImageClassifier implements Classifier {
     public List<Recognition> recognizeImage(Bitmap bitmap) {
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
         if(quant){
-            byte[][] result = new byte[1][labelList.size()];
+            byte[][] result = new byte[1][128];
             interpreter.run(byteBuffer, result);
-            return getSortedResultByte(result);
+            return new ArrayList<>();
         } else {
-            float [][] result = new float[1][labelList.size()];
+            float [][] result = new float[1][128];
             interpreter.run(byteBuffer, result);
-            return getSortedResultFloat(result);
+            return new ArrayList<>();
         }
 
     }
@@ -86,17 +83,6 @@ public class TensorFlowImageClassifier implements Classifier {
         long startOffset = fileDescriptor.getStartOffset();
         long declaredLength = fileDescriptor.getDeclaredLength();
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
-    }
-
-    private List<String> loadLabelList(AssetManager assetManager, String labelPath) throws IOException {
-        List<String> labelList = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open(labelPath)));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            labelList.add(line);
-        }
-        reader.close();
-        return labelList;
     }
 
     private ByteBuffer convertBitmapToByteBuffer(Bitmap bitmap) {
@@ -130,66 +116,5 @@ public class TensorFlowImageClassifier implements Classifier {
         return byteBuffer;
     }
 
-    @SuppressLint("DefaultLocale")
-    private List<Recognition> getSortedResultByte(byte[][] labelProbArray) {
-
-        PriorityQueue<Recognition> pq =
-                new PriorityQueue<>(
-                        MAX_RESULTS,
-                        new Comparator<Recognition>() {
-                            @Override
-                            public int compare(Recognition lhs, Recognition rhs) {
-                                return Float.compare(rhs.getConfidence(), lhs.getConfidence());
-                            }
-                        });
-
-        for (int i = 0; i < labelList.size(); ++i) {
-            float confidence = (labelProbArray[0][i] & 0xff) / 255.0f;
-            if (confidence > THRESHOLD) {
-                pq.add(new Recognition("" + i,
-                        labelList.size() > i ? labelList.get(i) : "unknown",
-                        confidence, quant));
-            }
-        }
-
-        final ArrayList<Recognition> recognitions = new ArrayList<>();
-        int recognitionsSize = Math.min(pq.size(), MAX_RESULTS);
-        for (int i = 0; i < recognitionsSize; ++i) {
-            recognitions.add(pq.poll());
-        }
-
-        return recognitions;
-    }
-
-    @SuppressLint("DefaultLocale")
-    private List<Recognition> getSortedResultFloat(float[][] labelProbArray) {
-
-        PriorityQueue<Recognition> pq =
-                new PriorityQueue<>(
-                        MAX_RESULTS,
-                        new Comparator<Recognition>() {
-                            @Override
-                            public int compare(Recognition lhs, Recognition rhs) {
-                                return Float.compare(rhs.getConfidence(), lhs.getConfidence());
-                            }
-                        });
-
-        for (int i = 0; i < labelList.size(); ++i) {
-            float confidence = labelProbArray[0][i];
-            if (confidence > THRESHOLD) {
-                pq.add(new Recognition("" + i,
-                        labelList.size() > i ? labelList.get(i) : "unknown",
-                        confidence, quant));
-            }
-        }
-
-        final ArrayList<Recognition> recognitions = new ArrayList<>();
-        int recognitionsSize = Math.min(pq.size(), MAX_RESULTS);
-        for (int i = 0; i < recognitionsSize; ++i) {
-            recognitions.add(pq.poll());
-        }
-
-        return recognitions;
-    }
 
 }
