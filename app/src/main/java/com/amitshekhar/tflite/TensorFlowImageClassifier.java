@@ -38,6 +38,8 @@ public class TensorFlowImageClassifier implements Classifier {
     private int inputSize;
     private boolean quant;
 
+    private byte[][] old;
+
     private TensorFlowImageClassifier() {
 
     }
@@ -60,7 +62,23 @@ public class TensorFlowImageClassifier implements Classifier {
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
         byte[][] result = new byte[1][512];
         interpreter.run(byteBuffer, result);
-        return new Classifier.Recognition(result);
+
+        double d = 1000.0;
+        if (old != null) {
+            d = l2dist(result, old);
+        }
+        return new Classifier.Recognition(result, d);
+    }
+
+    double l2dist(byte[][] a, byte[][] b) {
+        double ret = 0.0f;
+
+        for (int i = 0; i < 512; i++) {
+            double d = (double)a[0][i] - (double)b[0][i];
+            ret += d*d;
+        }
+
+        return Math.sqrt(ret);
     }
 
     @Override

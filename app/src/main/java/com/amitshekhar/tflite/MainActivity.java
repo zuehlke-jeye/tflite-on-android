@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String bla = results.toString();
 
-                textViewResult.setText(bla); //results.toString());
+                textViewResult.setText(bla);
 
             }
 
