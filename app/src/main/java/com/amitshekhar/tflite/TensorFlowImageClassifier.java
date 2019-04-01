@@ -67,6 +67,12 @@ public class TensorFlowImageClassifier implements Classifier {
         if (old != null) {
             d = l2dist(result, old);
         }
+
+        this.old = new byte[1][512];
+        for (int i = 0; i < 512; i++) {
+            this.old[0][i] = result[0][i];
+        }
+
         return new Classifier.Recognition(result, d);
     }
 
