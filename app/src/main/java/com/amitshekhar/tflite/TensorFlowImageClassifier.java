@@ -31,6 +31,8 @@ public class TensorFlowImageClassifier implements Classifier {
 
     private float[][] old;
 
+    private static final float THRESHOLD = 1.2f;
+
     private TensorFlowImageClassifier() {
 
     }

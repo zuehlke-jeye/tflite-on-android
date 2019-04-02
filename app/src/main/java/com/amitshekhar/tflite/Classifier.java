@@ -27,12 +27,22 @@ public interface Classifier {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append(this.d);
+
+
+            final boolean isSame = (this.d > 1.2f);
+
+            if (isSame) {
+                sb.append("I think you are the same person!\n");
+            } else {
+                sb.append("I don't think you are the same person!\n");
+            }
+
+            sb.append(this.d);/*
             sb.append("\n");
             for (int i = 0; i < 512; i++) {
                 sb.append(this.data[0][i]);
                 sb.append(" ");
-            }
+            }*/
             return sb.toString();
         }
     }
