@@ -29,7 +29,7 @@ public interface Classifier {
             StringBuilder sb = new StringBuilder();
 
 
-            final boolean isSame = (this.d > 1.2f);
+            final boolean isSame = (this.d < 1.2f);
 
             if (isSame) {
                 sb.append("I think you are the same person!\n");
