@@ -1,6 +1,7 @@
 package com.amitshekhar.tflite;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
@@ -9,12 +10,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.wonderkiln.camerakit.CameraKitError;
-import com.wonderkiln.camerakit.CameraKitEvent;
-import com.wonderkiln.camerakit.CameraKitEventListener;
-import com.wonderkiln.camerakit.CameraKitImage;
-import com.wonderkiln.camerakit.CameraKitVideo;
-import com.wonderkiln.camerakit.CameraView;
+import com.camerakit.CameraKitView;
 
 import org.christopherfrantz.dbscan.DBSCANClusterer;
 import org.christopherfrantz.dbscan.DBSCANClusteringException;
@@ -36,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewResult;
     private Button btnDetectObject, btnToggleCamera;
     private ImageView imageViewResult;
-    private CameraView cameraView;
+    private CameraKitView cameraView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,67 +46,45 @@ public class MainActivity extends AppCompatActivity {
         btnToggleCamera = findViewById(R.id.btnToggleCamera);
         btnDetectObject = findViewById(R.id.btnDetectObject);
 
-        cameraView.addCameraKitListener(new CameraKitEventListener() {
-            @Override
-            public void onEvent(CameraKitEvent cameraKitEvent) {
 
-            }
-
-            @Override
-            public void onError(CameraKitError cameraKitError) {
-
-            }
-
-            @Override
-            public void onImage(CameraKitImage cameraKitImage) {
-
-                Bitmap bitmap = cameraKitImage.getBitmap();
-
-                bitmap = Bitmap.createScaledBitmap(bitmap, INPUT_SIZE, INPUT_SIZE, false);
-
-                imageViewResult.setImageBitmap(bitmap);
-
-                final List<Classifier.Recognition> results = classifier.recognizeImage(bitmap);
-
-
-                DBSCANClusterer<Classifier.Recognition> clusterer = null;
-                List<ArrayList<Classifier.Recognition>> clusterResults = null;
-                try {
-                    clusterer = new DBSCANClusterer<>(results, 2, 1.2, new Classifier.DistanceMetricRecognition());
-                    clusterResults = clusterer.performClustering();
-
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Number of pictures taken = ");
-                    sb.append(results.size());
-                    sb.append("\n");
-                    sb.append("Number of clusters = ");
-                    sb.append(clusterResults.size());
-
-                    textViewResult.setText(sb.toString());
-
-                } catch (DBSCANClusteringException e) {
-                    textViewResult.setText(e.toString());
-                }
-            }
-
-            @Override
-            public void onVideo(CameraKitVideo cameraKitVideo) {
-
-            }
-        });
 
         btnToggleCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cameraView.toggleFacing();
-            }
-        });
 
-        btnDetectObject.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cameraView.captureImage();
+                cameraView.captureImage(new CameraKitView.ImageCallback() {
+                    @Override
+                    public void onImage(CameraKitView cameraKitView, final byte[] capturedImage) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(capturedImage, 0, capturedImage.length);
+                        bitmap = Bitmap.createScaledBitmap(bitmap, INPUT_SIZE, INPUT_SIZE, false);
+
+                        imageViewResult.setImageBitmap(bitmap);
+
+                        final List<Classifier.Recognition> results = classifier.recognizeImage(bitmap);
+
+
+                        DBSCANClusterer<Classifier.Recognition> clusterer = null;
+                        List<ArrayList<Classifier.Recognition>> clusterResults = null;
+                        try {
+                            clusterer = new DBSCANClusterer<>(results, 2, 1.2, new Classifier.DistanceMetricRecognition());
+                            clusterResults = clusterer.performClustering();
+
+
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("Number of pictures taken = ");
+                            sb.append(results.size());
+                            sb.append("\n");
+                            sb.append("Number of clusters = ");
+                            sb.append(clusterResults.size());
+
+                            textViewResult.setText(sb.toString());
+
+                        } catch (DBSCANClusteringException e) {
+                            textViewResult.setText(e.toString());
+                        }
+                    }
+                });
+
             }
         });
 
@@ -120,13 +94,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        cameraView.start();
+        cameraView.onResume();
     }
 
     @Override
     protected void onPause() {
-        cameraView.stop();
+        cameraView.onPause();
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        cameraView.onStop();
+        super.onStop();
     }
 
     @Override
@@ -138,6 +118,12 @@ public class MainActivity extends AppCompatActivity {
                 classifier.close();
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        cameraView.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void initTensorFlowAndLoadModel() {

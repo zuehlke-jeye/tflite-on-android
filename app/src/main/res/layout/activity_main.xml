@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.amitshekhar.tflite.MainActivity">
 
-    <com.wonderkiln.camerakit.CameraView
+    <com.camerakit.CameraKitView
         android:id="@+id/cameraView"
         android:layout_width="300dp"
         android:layout_height="300dp"
