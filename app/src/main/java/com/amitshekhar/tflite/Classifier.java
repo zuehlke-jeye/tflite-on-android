@@ -13,14 +13,26 @@ public interface Classifier {
     class Recognition {
         private float d;
 
-        public Recognition(float d) {
+        private float[][] data;
+
+        public Recognition(float[][] data, float d) {
             this.d = d;
+
+            this.data = new float[1][512];
+            for (int i = 0; i < 512; i++) {
+                this.data[0][i] = data[0][i];
+            }
         }
 
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append(this.d);
+            sb.append("\n");
+            for (int i = 0; i < 512; i++) {
+                sb.append(this.data[0][i]);
+                sb.append(" ");
+            }
             return sb.toString();
         }
     }

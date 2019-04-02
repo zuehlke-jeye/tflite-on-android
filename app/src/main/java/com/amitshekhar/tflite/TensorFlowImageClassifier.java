@@ -64,7 +64,7 @@ public class TensorFlowImageClassifier implements Classifier {
             this.old[0][i] = result[0][i];
         }
 
-        return new Classifier.Recognition(d);
+        return new Classifier.Recognition(result, d);
     }
 
     float l2dist(float[][] a, float[][] b) {
