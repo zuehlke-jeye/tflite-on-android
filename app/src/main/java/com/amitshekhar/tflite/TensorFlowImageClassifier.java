@@ -51,8 +51,14 @@ public class TensorFlowImageClassifier implements Classifier {
     @Override
     public Classifier.Recognition recognizeImage(Bitmap bitmap) {
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
+        byte[][] result_byte = new byte[1][512];
+        interpreter.run(byteBuffer, result_byte);
+
         float[][] result = new float[1][512];
-        interpreter.run(byteBuffer, result);
+
+        for (int i = 0; i < 512; i++) {
+            result[0][i] = ((float) (result_byte[0][i] & 0xFF)) / 255.0f;
+        }
 
         float d = 100000.0f;
         if (old != null) {

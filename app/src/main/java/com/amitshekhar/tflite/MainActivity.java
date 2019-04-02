@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String MODEL_PATH = "facenet_float.tflite";
+    private static final String MODEL_PATH = "facenet.tflite";
     private static final boolean QUANT = true;
     private static final int INPUT_SIZE = 160;
 
