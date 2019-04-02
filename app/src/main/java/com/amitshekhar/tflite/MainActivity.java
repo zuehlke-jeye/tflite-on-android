@@ -16,15 +16,13 @@ import com.wonderkiln.camerakit.CameraKitImage;
 import com.wonderkiln.camerakit.CameraKitVideo;
 import com.wonderkiln.camerakit.CameraView;
 
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String MODEL_PATH = "facenet.tflite";
+    private static final String MODEL_PATH = "facenet_float.tflite";
     private static final boolean QUANT = true;
-    //private static final String LABEL_PATH = "labels.txt";
     private static final int INPUT_SIZE = 160;
 
     private Classifier classifier;

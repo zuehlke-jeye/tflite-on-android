@@ -11,29 +11,16 @@ import java.util.List;
 public interface Classifier {
 
     class Recognition {
-        private byte data[][];
-        private double d;
+        private float d;
 
-        public Recognition(final byte data[][], double d) {
-            this.data = data;
+        public Recognition(float d) {
             this.d = d;
         }
 
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-
             sb.append(this.d);
-
-            /*try {
-                for (int i = 0; i < this.data[0].length; i++) {
-                    sb.append(this.data[0][i]);
-                }
-
-            } catch (Exception e) {
-                sb.append(e.toString());
-            }*/
-
             return sb.toString();
         }
     }
