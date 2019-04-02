@@ -2,6 +2,9 @@ package com.amitshekhar.tflite;
 
 import android.graphics.Bitmap;
 
+import org.christopherfrantz.dbscan.DBSCANClusteringException;
+import org.christopherfrantz.dbscan.DistanceMetric;
+
 import java.util.List;
 
 /**
@@ -11,13 +14,13 @@ import java.util.List;
 public interface Classifier {
 
     class Recognition {
-        private float d;
-
         private float[][] data;
 
-        public Recognition(float[][] data, float d) {
-            this.d = d;
+        public float[][] getData() {
+            return this.data;
+        }
 
+        public Recognition(float[][] data) {
             this.data = new float[1][512];
             for (int i = 0; i < 512; i++) {
                 this.data[0][i] = data[0][i];
@@ -27,28 +30,30 @@ public interface Classifier {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-
-
-            final boolean isSame = (this.d > 1.2f);
-
-            if (isSame) {
-                sb.append("I think you are the same person!\n");
-            } else {
-                sb.append("I don't think you are the same person!\n");
-            }
-
-            sb.append(this.d);/*
-            sb.append("\n");
-            for (int i = 0; i < 512; i++) {
-                sb.append(this.data[0][i]);
-                sb.append(" ");
-            }*/
             return sb.toString();
         }
     }
 
+    class DistanceMetricRecognition implements DistanceMetric<Recognition> {
 
-    Classifier.Recognition recognizeImage(Bitmap bitmap);
+        @Override
+        public double calculateDistance(Recognition lhs, Recognition rhs) throws DBSCANClusteringException {
+            float[][] lhsData = lhs.getData();
+            float[][] rhsData = rhs.getData();
+
+            float ret = 0.0f;
+            for (int i = 0; i < lhsData[0].length; i++) {
+                float d = lhsData[0][i] - rhsData[0][i];
+                d *= d;
+
+                ret += d;
+            }
+
+            return Math.sqrt((double) ret);
+        }
+    }
+
+    List<Classifier.Recognition> recognizeImage(Bitmap bitmap);
 
     void close();
 }

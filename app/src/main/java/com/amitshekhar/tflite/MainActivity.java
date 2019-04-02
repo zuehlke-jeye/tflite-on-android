@@ -16,6 +16,11 @@ import com.wonderkiln.camerakit.CameraKitImage;
 import com.wonderkiln.camerakit.CameraKitVideo;
 import com.wonderkiln.camerakit.CameraView;
 
+import org.christopherfrantz.dbscan.DBSCANClusterer;
+import org.christopherfrantz.dbscan.DBSCANClusteringException;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -65,11 +70,25 @@ public class MainActivity extends AppCompatActivity {
 
                 imageViewResult.setImageBitmap(bitmap);
 
-                final Classifier.Recognition results = classifier.recognizeImage(bitmap);
+                final List<Classifier.Recognition> results = classifier.recognizeImage(bitmap);
 
-                String bla = results.toString();
 
-                textViewResult.setText(bla);
+                DBSCANClusterer<Classifier.Recognition> clusterer = null;
+                List<ArrayList<Classifier.Recognition>> clusterResults = null;
+                try {
+                    clusterer = new DBSCANClusterer<>(results, 1, 1.2, new Classifier.DistanceMetricRecognition());
+                    clusterResults = clusterer.performClustering();
+                } catch (DBSCANClusteringException e) {
+                    // idgaf
+                }
+                StringBuilder sb = new StringBuilder();
+                sb.append("Number of pictures taken = ");
+                sb.append(results.size());
+                sb.append("\n");
+                sb.append("Number of clusters = ");
+                sb.append(clusterResults.size());
+
+                textViewResult.setText(sb.toString());
 
             }
 

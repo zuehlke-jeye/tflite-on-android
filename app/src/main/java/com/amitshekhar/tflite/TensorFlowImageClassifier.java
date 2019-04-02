@@ -4,6 +4,7 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 
+import org.christopherfrantz.dbscan.DBSCANClusterer;
 import org.tensorflow.lite.Interpreter;
 
 import java.io.FileInputStream;
@@ -12,6 +13,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by amitshekhar on 17/03/18.
@@ -33,6 +37,8 @@ public class TensorFlowImageClassifier implements Classifier {
 
     private static final float THRESHOLD = 1.2f;
 
+    private List<Recognition> recognitions;
+
     private TensorFlowImageClassifier() {
 
     }
@@ -46,12 +52,13 @@ public class TensorFlowImageClassifier implements Classifier {
         classifier.interpreter = new Interpreter(classifier.loadModelFile(assetManager, modelPath), new Interpreter.Options());
         classifier.inputSize = inputSize;
         classifier.quant = quant;
+        classifier.recognitions = new ArrayList<>();
 
         return classifier;
     }
 
     @Override
-    public Classifier.Recognition recognizeImage(Bitmap bitmap) {
+    public List<Classifier.Recognition> recognizeImage(Bitmap bitmap) {
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
         byte[][] result_byte = new byte[1][512];
         interpreter.run(byteBuffer, result_byte);
@@ -62,28 +69,11 @@ public class TensorFlowImageClassifier implements Classifier {
             result[0][i] = ((float) (result_byte[0][i] & 0xFF)) / 255.0f;
         }
 
-        float d = 100000.0f;
-        if (old != null) {
-            d = l2dist(result, old);
-        }
+        Classifier.Recognition recognition = new Classifier.Recognition(result);
 
-        this.old = new float[1][512];
-        for (int i = 0; i < 512; i++) {
-            this.old[0][i] = result[0][i];
-        }
+        recognitions.add(recognition);
 
-        return new Classifier.Recognition(result, d);
-    }
-
-    float l2dist(float[][] a, float[][] b) {
-        float ret = 0.0f;
-
-        for (int i = 0; i < 512; i++) {
-            float d = a[0][i] - b[0][i];
-            ret += d*d;
-        }
-
-        return (float) Math.sqrt(ret);
+        return recognitions;
     }
 
     @Override
