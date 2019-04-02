@@ -76,20 +76,22 @@ public class MainActivity extends AppCompatActivity {
                 DBSCANClusterer<Classifier.Recognition> clusterer = null;
                 List<ArrayList<Classifier.Recognition>> clusterResults = null;
                 try {
-                    clusterer = new DBSCANClusterer<>(results, 1, 1.2, new Classifier.DistanceMetricRecognition());
+                    clusterer = new DBSCANClusterer<>(results, 2, 1.2, new Classifier.DistanceMetricRecognition());
                     clusterResults = clusterer.performClustering();
+
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Number of pictures taken = ");
+                    sb.append(results.size());
+                    sb.append("\n");
+                    sb.append("Number of clusters = ");
+                    sb.append(clusterResults.size());
+
+                    textViewResult.setText(sb.toString());
+
                 } catch (DBSCANClusteringException e) {
-                    // idgaf
+                    textViewResult.setText(e.toString());
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Number of pictures taken = ");
-                sb.append(results.size());
-                sb.append("\n");
-                sb.append("Number of clusters = ");
-                sb.append(clusterResults.size());
-
-                textViewResult.setText(sb.toString());
-
             }
 
             @Override
