@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.wonderkiln.camerakit.CameraKit;
 import com.wonderkiln.camerakit.CameraKitError;
 import com.wonderkiln.camerakit.CameraKitEvent;
 import com.wonderkiln.camerakit.CameraKitEventListener;
@@ -33,9 +34,9 @@ public class MainActivity extends AppCompatActivity {
     private Classifier classifier;
 
     private Executor executor = Executors.newSingleThreadExecutor();
-    private TextView textViewResult;
-    private Button btnDetectObject, btnToggleCamera;
-    private ImageView imageViewResult;
+    //private TextView textViewResult;
+    //private Button btnDetectObject, btnToggleCamera;
+    //private ImageView imageViewResult;
     private CameraView cameraView;
 
     @Override
@@ -43,13 +44,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         cameraView = findViewById(R.id.cameraView);
-        imageViewResult = findViewById(R.id.imageViewResult);
+        cameraView.setFacing(CameraKit.Constants.FACING_FRONT);
+
+        /*imageViewResult = findViewById(R.id.imageViewResult);
         textViewResult = findViewById(R.id.textViewResult);
         textViewResult.setMovementMethod(new ScrollingMovementMethod());
 
         btnToggleCamera = findViewById(R.id.btnToggleCamera);
         btnDetectObject = findViewById(R.id.btnDetectObject);
-
+*/
         cameraView.addCameraKitListener(new CameraKitEventListener() {
             @Override
             public void onEvent(CameraKitEvent cameraKitEvent) {
@@ -68,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
                 bitmap = Bitmap.createScaledBitmap(bitmap, INPUT_SIZE, INPUT_SIZE, false);
 
-                imageViewResult.setImageBitmap(bitmap);
+                //imageViewResult.setImageBitmap(bitmap);
 
                 final List<Classifier.Recognition> results = classifier.recognizeImage(bitmap);
 
@@ -87,10 +90,10 @@ public class MainActivity extends AppCompatActivity {
                     sb.append("Number of clusters = ");
                     sb.append(clusterResults.size());
 
-                    textViewResult.setText(sb.toString());
+                    //textViewResult.setText(sb.toString());
 
                 } catch (DBSCANClusteringException e) {
-                    textViewResult.setText(e.toString());
+                    //textViewResult.setText(e.toString());
                 }
             }
 
@@ -100,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btnToggleCamera.setOnClickListener(new View.OnClickListener() {
+        /*btnToggleCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 cameraView.toggleFacing();
@@ -112,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 cameraView.captureImage();
             }
-        });
+        });*/
 
         initTensorFlowAndLoadModel();
     }
@@ -162,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                btnDetectObject.setVisibility(View.VISIBLE);
+                //btnDetectObject.setVisibility(View.VISIBLE);
             }
         });
     }
