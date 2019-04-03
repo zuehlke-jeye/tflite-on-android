@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,14 +11,25 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.amitshekhar.tflite.MainActivity">
 
-    <com.camerakit.CameraKitView
+    <!--<com.camerakit.CameraKitView
         android:id="@+id/cameraView"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_gravity="center|top" />
+        android:layout_gravity="center|top"
+        android:adjustViewBounds="true"
+        android:keepScreenOn="true"
+        app:camera_facing="front"
+        app:camera_focus="continuous"
+        app:camera_permissions="camera"/>-->
+
+    <com.camerakit.CameraKitView
+        android:id="@+id/cameraView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:camera_facing="front" />
 
 
-    <LinearLayout
+    <!--<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_gravity="center|top"
@@ -63,5 +75,5 @@
         android:textAllCaps="false"
         android:textColor="@android:color/black"
         android:visibility="gone" />
-
+-->
 </FrameLayout>
