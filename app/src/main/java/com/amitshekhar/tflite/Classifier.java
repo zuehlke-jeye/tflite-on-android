@@ -32,28 +32,29 @@ public interface Classifier {
             StringBuilder sb = new StringBuilder();
             return sb.toString();
         }
+
+        public float l2distance(Recognition other) {
+            float ret = 0.0f;
+            for (int i = 0; i < this.data[0].length; i++) {
+                float d = this.data[0][i] - other.data[0][i];
+                d *= d;
+
+                ret += d;
+            }
+
+            return (float) Math.sqrt((double) ret);
+        }
     }
 
     class DistanceMetricRecognition implements DistanceMetric<Recognition> {
 
         @Override
         public double calculateDistance(Recognition lhs, Recognition rhs) throws DBSCANClusteringException {
-            float[][] lhsData = lhs.getData();
-            float[][] rhsData = rhs.getData();
-
-            float ret = 0.0f;
-            for (int i = 0; i < lhsData[0].length; i++) {
-                float d = lhsData[0][i] - rhsData[0][i];
-                d *= d;
-
-                ret += d;
-            }
-
-            return Math.sqrt((double) ret);
+            return (double) lhs.l2distance(rhs);
         }
     }
 
-    List<Classifier.Recognition> recognizeImage(Bitmap bitmap);
+    Classifier.Recognition recognizeImage(Bitmap bitmap);
 
     void close();
 }

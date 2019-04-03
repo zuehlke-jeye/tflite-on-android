@@ -3,6 +3,7 @@ package com.amitshekhar.tflite;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import org.christopherfrantz.dbscan.DBSCANClusterer;
 import org.tensorflow.lite.Interpreter;
@@ -33,11 +34,9 @@ public class TensorFlowImageClassifier implements Classifier {
     private int inputSize;
     private boolean quant;
 
-    private float[][] old;
-
     private static final float THRESHOLD = 1.2f;
 
-    private List<Recognition> recognitions;
+    private Recognition old;
 
     private TensorFlowImageClassifier() {
 
@@ -52,13 +51,12 @@ public class TensorFlowImageClassifier implements Classifier {
         classifier.interpreter = new Interpreter(classifier.loadModelFile(assetManager, modelPath), new Interpreter.Options());
         classifier.inputSize = inputSize;
         classifier.quant = quant;
-        classifier.recognitions = new ArrayList<>();
 
         return classifier;
     }
 
     @Override
-    public List<Classifier.Recognition> recognizeImage(Bitmap bitmap) {
+    public Classifier.Recognition recognizeImage(Bitmap bitmap) {
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
         byte[][] result_byte = new byte[1][512];
         interpreter.run(byteBuffer, result_byte);
@@ -71,9 +69,18 @@ public class TensorFlowImageClassifier implements Classifier {
 
         Classifier.Recognition recognition = new Classifier.Recognition(result);
 
-        recognitions.add(recognition);
+        if (old != null) {
+            float d = recognition.l2distance(old);
 
-        return recognitions;
+            StringBuilder sb = new StringBuilder();
+            sb.append(d);
+
+            Log.d("fuck", sb.toString());
+        }
+
+
+        old = recognition;
+        return recognition;
     }
 
     @Override

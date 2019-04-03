@@ -58,8 +58,6 @@ public class MainActivity extends AppCompatActivity {
 
         File outFile = new File(applicationDir, "bla.jpg");
 
-        Log.d("fuck", outFile.toString());
-
         try (FileOutputStream out = new FileOutputStream(outFile)) {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
         } catch (Exception e) {
@@ -107,34 +105,21 @@ public class MainActivity extends AppCompatActivity {
             public void onImage(CameraKitImage cameraKitImage) {
                 Bitmap bitmap = cameraKitImage.getBitmap();
 
-                bitmap = Bitmap.createBitmap(bitmap, 300, 1100, 1400, 1400);
-                bitmap = Bitmap.createScaledBitmap(bitmap, INPUT_SIZE, INPUT_SIZE, false);
+                StringBuilder sb = new StringBuilder();
+                sb.append("Bitmap dimensions: Width = ");
+                sb.append(bitmap.getWidth());
+                sb.append(", Height = ");
+                sb.append(bitmap.getHeight());
+                Log.d("fuck", sb.toString());
 
+                bitmap = Bitmap.createBitmap(bitmap, 380, 1200, 1400, 1400);
+                bitmap = Bitmap.createScaledBitmap(bitmap, INPUT_SIZE, INPUT_SIZE, true);
+                
                 //writeImg(bitmap);
-                //imageViewResult.setImageBitmap(bitmap);
 
-                final List<Classifier.Recognition> results = classifier.recognizeImage(bitmap);
+                final Classifier.Recognition result = classifier.recognizeImage(bitmap);
 
-
-                DBSCANClusterer<Classifier.Recognition> clusterer = null;
-                List<ArrayList<Classifier.Recognition>> clusterResults = null;
-                try {
-                    clusterer = new DBSCANClusterer<>(results, 2, 1.2, new Classifier.DistanceMetricRecognition());
-                    clusterResults = clusterer.performClustering();
-
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Number of pictures taken = ");
-                    sb.append(results.size());
-                    sb.append("\n");
-                    sb.append("Number of clusters = ");
-                    sb.append(clusterResults.size());
-
-                    //textViewResult.setText(sb.toString());
-
-                } catch (DBSCANClusteringException e) {
-                    //textViewResult.setText(e.toString());
-                }
+                // TODO: do something with result
             }
 
             @Override
