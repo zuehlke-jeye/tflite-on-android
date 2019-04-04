@@ -1,24 +1,20 @@
 package com.amitshekhar.tflite;
 
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Paint;
 import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.method.ScrollingMovementMethod;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.wonderkiln.camerakit.CameraKit;
@@ -28,9 +24,6 @@ import com.wonderkiln.camerakit.CameraKitEventListener;
 import com.wonderkiln.camerakit.CameraKitImage;
 import com.wonderkiln.camerakit.CameraKitVideo;
 import com.wonderkiln.camerakit.CameraView;
-
-import org.christopherfrantz.dbscan.DBSCANClusterer;
-import org.christopherfrantz.dbscan.DBSCANClusteringException;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -52,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private ShapeDrawable boundingBox;
     private View boundingBoxView;
+
+    private FaceClusterer clusterer;
 
     private void writeImg(Bitmap bitmap) {
         File applicationDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS); //getApplication().getFilesDir();
@@ -80,6 +75,16 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void handleRecognition(Classifier.Recognition recognition) {
+        String name = clusterer.query(recognition);
+
+        if (name != null) {
+            nameDialog(name, recognition);
+        } else {
+            promptDialog(recognition);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,8 +92,9 @@ public class MainActivity extends AppCompatActivity {
         cameraView = findViewById(R.id.cameraView);
         cameraView.setFacing(CameraKit.Constants.FACING_FRONT);
         fab = findViewById(R.id.fab);
-
         requestRuntimePermissions();
+
+        clusterer = new FaceClusterer();
 
         cameraView.addCameraKitListener(new CameraKitEventListener() {
             @Override
@@ -118,6 +124,10 @@ public class MainActivity extends AppCompatActivity {
                 //writeImg(bitmap);
 
                 final Classifier.Recognition result = classifier.recognizeImage(bitmap);
+
+
+                handleRecognition(result);
+
 
                 // TODO: do something with result
             }
@@ -171,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
                             MODEL_PATH,
                             INPUT_SIZE,
                             QUANT);
-                    makeButtonVisible();
                 } catch (final Exception e) {
                     throw new RuntimeException("Error initializing TensorFlow!", e);
                 }
@@ -179,12 +188,45 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void makeButtonVisible() {
-        runOnUiThread(new Runnable() {
+    private void nameDialog(final String name, final Classifier.Recognition recognition) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Hi " + name + "!");
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
-            public void run() {
-                //btnDetectObject.setVisibility(View.VISIBLE);
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Log.d("fuck", "Add named cluster");
+                clusterer.add(name, recognition);
             }
         });
+
+        builder.show();
+    }
+
+    private void promptDialog(final Classifier.Recognition recognition) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Add Person");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String name = input.getText().toString();
+                clusterer.add(name, recognition);
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Log.d("fuck", "Cancel adding named cluster");
+            }
+        });
+
+        builder.show();
     }
 }

@@ -49,6 +49,8 @@ public class TensorFlowImageClassifier implements Classifier {
 
         TensorFlowImageClassifier classifier = new TensorFlowImageClassifier();
         classifier.interpreter = new Interpreter(classifier.loadModelFile(assetManager, modelPath), new Interpreter.Options());
+        classifier.interpreter.setUseNNAPI(true);
+
         classifier.inputSize = inputSize;
         classifier.quant = quant;
 
